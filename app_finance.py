@@ -71,11 +71,18 @@ with tab1:
 
 with tab2:
     st.subheader("📅 Balanço Mensal")
-    df['Data'] = pd.to_datetime(df['Data'])
-    df['Mês'] = df['Data'].dt.strftime('%Y-%m')
-    mensal = df.groupby(['Mês', 'Tipo'])['Valor'].sum().unstack().fillna(0)
-    mensal['Saldo'] = mensal['Entrada'] - mensal['Saída']
-    st.line_chart(mensal[['Entrada', 'Saída', 'Saldo']])
+    if not df.empty:
+        df['Data'] = pd.to_datetime(df['Data'])
+        df['Mês'] = df['Data'].dt.strftime('%Y-%m')
+        mensal = df.groupby(['Mês', 'Tipo'])['Valor'].sum().unstack(fill_value=0)
+        
+        mensal['Entrada'] = mensal.get('Entrada', 0)
+        mensal['Saída'] = mensal.get('Saída', 0)
+        mensal['Saldo'] = mensal['Entrada'] - mensal['Saída']
+        
+        st.line_chart(mensal[['Entrada', 'Saída', 'Saldo']])
+    else:
+        st.write("Adicione transações para ver o balanço mensal.")
 
 with tab3:
     st.subheader("🤖 Recomendações Financeiras")
